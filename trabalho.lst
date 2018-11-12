@@ -1,0 +1,174 @@
+ASSEMBLER PDS16 - v3.0.2 
+trabalho.lst 	 Sun Nov 11 23:18:35 2018
+
+**********************************************************************************************
+Secção                 Endereço
+**********************************************************************************************
+
+startup                 0000H
+DATA                    0002H
+TEXT                    001CH
+
+
+**********************************************************************************************
+Símbolo                Tipo   Valor
+**********************************************************************************************
+
+ascToUint               E     0032H
+ascToUint_aux           E     0012H
+ascToUint_r1            E     000AH
+ascToUint_r2            E     000CH
+ascToUint_r3            E     000EH
+ascToUint_r4            E     0010H
+data                    E     0016H
+DATA_DIM                N     0005H
+end_for                 E     0058H
+for                     E     0044H
+main                    E     001CH
+multiply10              E     0022H
+multiply10_aux          E     0002H
+multiply10_r1           E     0004H
+multiply10_r2           E     0006H
+r5_backup               E     0014H
+src                     E     0062H
+TMP_SIZE                N     000AH
+val                     E     0008H
+
+
+E - Endereço   N - Constante numérica
+
+
+**********************************************************************************************
+Endereço  Código            Linha    Programa
+**********************************************************************************************
+
+                                1    	.section startup
+    0000  606F                  2    	jmp main
+                                3    
+                                4    	.data
+                                5    multiply10_aux:
+    0002  0000                  6    	.space 2
+                                7    multiply10_r1: 
+    0004  0000                  8    	.space 2
+                                9    multiply10_r2: 
+    0006  0000                 10    	.space 2	
+                               11    val:	
+    0008  0009                 12    	.word	9
+                               13    	
+                               14    	
+                               15    ascToUint_r1:
+    000A  0000                 16    	.space 2
+                               17    ascToUint_r2:
+    000C  0000                 18    	.space 2
+                               19    ascToUint_r3:
+    000E  0000                 20    	.space 2
+                               21    ascToUint_r4:
+    0010  0000                 22    	.space 2
+                               23    ascToUint_aux:
+    0012  0000                 24    	.space 2
+                               25    r5_backup:
+    0014  0000                 26    	.space 2
+                               27    	
+                               28    	.equ DATA_DIM, 5
+                               29    data:
+    0016  313233343500         30    	.asciiz "12345"
+                               31    
+                               32    
+                               33    	.text
+                               34    
+                               35    main:
+    001C  00B0                 36    	ldi r0, #data
+    001E  684F                 37    	jmpl ascToUint
+    0020  67FF                 38    	jmp  $
+                               39    
+                               40    /*	ex: 4.1
+                               41    	uint16 multiply10( uint16 val ){
+                               42    		return (val << 3) + (val << 1);
+                               43    	}
+                               44    */	
+                               45    multiply10:
+    0022  3421                 46    	st r1, multiply10_r1 	
+    0024  3432                 47    	st r2, multiply10_r2	
+    0026  E0C1                 48    	shl r1, r0, #3, 0		; (val << 3)
+    0028  E042                 49    	shl r2, r0, #1, 0		; (val << 1)
+    002A  8688                 50    	add r0, r1, r2			; return r1 + r2
+    002C  1421                 51    	ld r1, multiply10_r1	
+    002E  1432                 52    	ld r2, multiply10_r2	
+    0030  CB6F                 53    	ret
+                               54    	
+                               55    	
+                               56    /*	ex: 4.2
+                               57    	uint16 ascToUint( uint8 data[] ){
+                               58    		uint16 res = 0;
+                               59    		for( int i = 0; data[i] != 0; ++i ){
+                               60    			res = multiply10(res) + data[i] - '0';
+                               61    		}
+                               62    		return res;
+                               63    	}
+                               64    */	
+                               65    
+                               66    ascToUint:					;total => 126clk => 252ms
+    0032  3451                 67    	st r1, ascToUint_r1		;6clk => 12ms
+    0034  3462                 68    	st r2, ascToUint_r2		;6clk => 12ms
+    0036  3473                 69    	st r3, ascToUint_r3		;6clk => 12ms
+    0038  3484                 70    	st r4, ascToUint_r4		;6clk => 12ms
+    003A  A403                 71    	add  r3, r0, #0			;4clk => 8ms
+    003C  0000                 72    	ldi r0, #0				;6clk => 12ms
+    003E  0001                 73    	ldi r1, #0				;6clk => 12ms		;int i = 0
+    0040  007A                 74    	ldi r2, #0xF			;6clk => 12ms	
+    0042  0184                 75    	ldi r4, #'0'			;6clk => 12ms		;store 30 on r4
+                               76    	
+                               77    for:
+    0044  1A5A                 78    	ldb r2, [r3, r1]		;6clk => 12ms		;data[i]
+    0046  AC12                 79    	sub r2, r2, #0			;4clk => 8ms		;data[i] != 0
+    0048  403F                 80    	jz end_for				;4clk => 8ms
+    004A  34A5                 81    	st r5, r5_backup		;6clk => 12ms
+    004C  6F57                 82    	jmpl multiply10			;4clk => 8ms		;multiply10(res)
+    004E  14A5                 83    	ld r5, r5_backup		;6clk => 12ms
+    0050  8F12                 84    	sub r2, r2, r4			;4clk => 8ms		;data[i] - '0'
+    0052  8680                 85    	add r0, r0, r2			;4clk => 8ms		;res = multiply10(res) + data[i] - '0'
+    0054  A449                 86    	add r1, r1, #1			;4clk => 8ms		;++i
+    0056  67B7                 87    	jmp for					;4clk => 8ms
+                               88    
+                               89    end_for:
+    0058  1451                 90    	ld r1, ascToUint_r1		;6clk => 12ms
+    005A  1462                 91    	ld r2, ascToUint_r2		;6clk => 12ms
+    005C  1473                 92    	ld r3, ascToUint_r3		;6clk => 12ms
+    005E  1484                 93    	ld r4, ascToUint_r4		;6clk => 12ms
+    0060  CB6F                 94    	ret						;4clk => 8ms
+                               95    	
+                               96    	
+                               97    /*	
+                               98    	#define TMP_SIZE 10 
+                               99    	uint8 tmp[TMP_SIZE]; 
+                              100     
+                              101    	uint16 ascToUintArr( uint16 dst[], uint16 dlen, uint8 src[] ){  
+                              102    		uint16 di = 0, si = 0; 
+                              103    		while( di < dlen ){   
+                              104    			while( src[si] < '0' || src[si] > '9'){    
+                              105    				if( src[si++] == 0 ){     
+                              106    					return di;    
+                              107    				}   
+                              108    			}   
+                              109    			uint16 ti = 0;   
+                              110    			while( src[si] >= '0' && src[si] <= '9' ){    
+                              111    				tmp[ ti++ ] = src[ si++ ];   
+                              112    			}   tmp[ ti++ ] = 0;   
+                              113    			dst[ di++ ] = ascToUint( tmp );  
+                              114    		}  
+                              115    		return di; 
+                              116    	}
+                              117    */
+                              118    
+                              119    .equ TMP_SIZE, 10
+                              120    src:
+    0062  0001000200030004    121    	.word 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+    .     0005000600070008
+    .     0009000A        
+
+                              122    
+                              123    
+                              124    		
+                              125    	
+                              126    		
+                              127    .end
