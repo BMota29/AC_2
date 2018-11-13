@@ -63,35 +63,35 @@ multiply10:
 	}
 */	
 
-ascToUint:					;total => 126clk => 252ms
+ascToUint:				;total => 126clk => 252ms
 	st r1, ascToUint_r1		;6clk => 12ms
 	st r2, ascToUint_r2		;6clk => 12ms
 	st r3, ascToUint_r3		;6clk => 12ms
 	st r4, ascToUint_r4		;6clk => 12ms
 	add  r3, r0, #0			;4clk => 8ms
-	ldi r0, #0				;6clk => 12ms
-	ldi r1, #0				;6clk => 12ms		;int i = 0
+	ldi r0, #0			;6clk => 12ms
+	ldi r1, #0			;6clk => 12ms		;int i = 0
 	ldi r2, #0xF			;6clk => 12ms	
 	ldi r4, #'0'			;6clk => 12ms		;store 30 on r4
 	
 for:
 	ldb r2, [r3, r1]		;6clk => 12ms		;data[i]
 	sub r2, r2, #0			;4clk => 8ms		;data[i] != 0
-	jz end_for				;4clk => 8ms
+	jz end_for			;4clk => 8ms
 	st r5, r5_backup		;6clk => 12ms
 	jmpl multiply10			;4clk => 8ms		;multiply10(res)
 	ld r5, r5_backup		;6clk => 12ms
 	sub r2, r2, r4			;4clk => 8ms		;data[i] - '0'
 	add r0, r0, r2			;4clk => 8ms		;res = multiply10(res) + data[i] - '0'
 	add r1, r1, #1			;4clk => 8ms		;++i
-	jmp for					;4clk => 8ms
+	jmp for				;4clk => 8ms
 
 end_for:
 	ld r1, ascToUint_r1		;6clk => 12ms
 	ld r2, ascToUint_r2		;6clk => 12ms
 	ld r3, ascToUint_r3		;6clk => 12ms
 	ld r4, ascToUint_r4		;6clk => 12ms
-	ret						;4clk => 8ms
+	ret				;4clk => 8ms
 	
 	/*
 	Resposta 4.2:
