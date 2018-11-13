@@ -132,16 +132,16 @@ src:
 ascToUintArr:
 	st r3, ascToUintArr_r3
 	st r4, ascToUintArr_r4
-	ldi r3, #0								;di = 0
-	ldi r4, #0								;si = 0
+	ldi r3, #0			;di = 0
+	ldi r4, #0			;si = 0
 
 while1:
-	subr r3, r3, r1						;di < dlen
+	subr r3, r3, r1			;di < dlen
 	jc end_while1
 
 while2:
-	ldi r?, [r2,r4]						;src[si] < '0'
-	subr r?, r?, #'0'						;...
+	ldi r?, [r2,r4]			;src[si] < '0'
+	subr r?, r?, #'0'		;...
 end_while1:
 
 
